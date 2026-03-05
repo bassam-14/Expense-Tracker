@@ -1,6 +1,8 @@
 import pika
 import json
 import os
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from dotenv import load_dotenv
 from minio_client import download_receipt
 from ocr_processor import process_receipt
@@ -16,6 +18,18 @@ RABBITMQ_VHOST = os.getenv("RABBITMQ_VHOST")
 
 # Ensure temporary folder exists
 os.makedirs("temp_receipts", exist_ok=True)
+
+
+# DUMMY SERVER CODE
+class HealthCheckHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"ML Worker is running!")
+
+
+def start_dummy_server():
+    HTTPServer(("0.0.0.0", 7860), HealthCheckHandler).serve_forever()
 
 
 def handle_message(ch, method, properties, body):
@@ -56,6 +70,10 @@ def handle_message(ch, method, properties, body):
 
 
 def main():
+    # START THE DUMMY SERVER FIRST
+    threading.Thread(target=start_dummy_server, daemon=True).start()
+    print("[*] Dummy web server started on port 7860")
+
     # Connect to RabbitMQ
     credentials = pika.PlainCredentials(RABBITMQ_USER, RABBITMQ_PASSWORD)
     parameters = pika.ConnectionParameters(
