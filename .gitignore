@@ -15,9 +15,6 @@ yarn-error.log*
 target/
 *.jar
 *.war
-.mvn/
-mvnw
-mvnw.cmd
 .gitattributes
 
 __pycache__/
