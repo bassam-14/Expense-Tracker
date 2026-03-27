@@ -27,6 +27,10 @@ class HealthCheckHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(b"ML Worker is running!")
 
+    def do_HEAD(self):
+        self.send_response(200)
+        self.end_headers()
+
 
 def start_dummy_server():
     HTTPServer(("0.0.0.0", 7860), HealthCheckHandler).serve_forever()
